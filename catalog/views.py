@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.shortcuts import render
 
 # Create your views here.
@@ -31,13 +32,31 @@ def index(request):
 from django.views import generic
 
 
+
+
+
 class BookListView(generic.ListView):
-    """Generic class-based view for a list of books."""
     model = Book
-    paginate_by = 10
+    context_object_name = 'book_list'   # ваше собственное имя переменной контекста в шаблоне
+    queryset = Book.objects.filter(title__icontains='war')[:5] # Получение 5 книг, содержащих слово 'war' в заголовке
+    template_name = 'book_list.html'  # Определение имени вашего шаблона и его расположения
+
 
 
 class BookDetailView(generic.DetailView):
-    """Generic class-based detail view for a book."""
     model = Book
+
+    def book_detail_view(request, pk):
+        try:
+            book_id = Book.objects.get(pk=pk)
+        except Book.DoesNotExist:
+            raise Http404("Book does not exist")
+
+        # book_id=get_object_or_404(Book, pk=pk)
+
+        return render(
+            request,
+            'catalog/book_detail.html',
+            context={'book': book_id, }
+        )
 

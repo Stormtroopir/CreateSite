@@ -5,7 +5,7 @@ from . import views
 
 urlpatterns = [
     url('', views.index, name='index'),
-    url('books/', views.BookListView.as_view(), name='books'),
-    url('book/<int:pk>', views.BookDetailView.as_view(), name='book-detail'),
+    url(r'^books/$', views.BookListView.as_view(), name='books'),
+    url(r'^book/(?P<pk>\d+)$', views.BookDetailView.as_view(), name='book-detail'),
 ]
 
