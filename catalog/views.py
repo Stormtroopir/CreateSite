@@ -1,5 +1,6 @@
 from django.http import Http404
 from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 
@@ -17,7 +18,7 @@ def index(request):
 
     # Number of visits to this view, as counted in the session variable.
     num_visits = request.session.get('num_visits', 0)
-    request.session['num_visits'] = num_visits+1
+    request.session['num_visits'] = num_visits + 1
 
     # Render the HTML template index.html with the data in the context variable.
     return render(
@@ -32,31 +33,21 @@ def index(request):
 from django.views import generic
 
 
-
-
-
 class BookListView(generic.ListView):
     model = Book
-    context_object_name = 'book_list'   # ваше собственное имя переменной контекста в шаблоне
-    queryset = Book.objects.filter(title__icontains='war')[:5] # Получение 5 книг, содержащих слово 'war' в заголовке
-    template_name = 'book_list.html'  # Определение имени вашего шаблона и его расположения
-
-
+    paginate_by = 10
 
 class BookDetailView(generic.DetailView):
     model = Book
 
-    def book_detail_view(request, pk):
-        try:
-            book_id = Book.objects.get(pk=pk)
-        except Book.DoesNotExist:
-            raise Http404("Book does not exist")
 
-        # book_id=get_object_or_404(Book, pk=pk)
+class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
+    """
+    Generic class-based view listing books on loan to current user.
+    """
+    model = BookInstance
+    template_name = 'catalog/bookinstance_list_borrowed_user.html'
+    paginate_by = 10
 
-        return render(
-            request,
-            'catalog/book_detail.html',
-            context={'book': book_id, }
-        )
-
+    def get_queryset(self):
+        return BookInstance.objects.filter(borrower=self.request.user).filter(status__exact='o').order_by('due_back')
