@@ -1,6 +1,7 @@
 from django.http import Http404
 from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import generic
 
 # Create your views here.
 
@@ -30,21 +31,24 @@ def index(request):
     )
 
 
-from django.views import generic
-
-
 class BookListView(generic.ListView):
     model = Book
     paginate_by = 10
 
-class AuthorsListView(generic.ListView):
-        model = Author
-        paginate_by = 10
+
+class AuthorListView(generic.ListView):
+    model = Author
+    paginate_by = 10
+
+
+class AuthorDetailView(generic.DetailView):
+    model = Author
+    paginate_by = 10
 
 
 class BookDetailView(generic.DetailView):
     model = Book
-
+    paginate_by = 5
 
 class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
     """
@@ -68,5 +72,3 @@ class LoanedBooksAllListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         return BookInstance.objects.all()
-
-
