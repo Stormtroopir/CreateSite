@@ -4,6 +4,7 @@ import uuid  # Required for unique book instances
 from django.contrib.auth.models import User
 from datetime import date
 
+
 # Create your models here.
 
 
@@ -56,6 +57,9 @@ class BookInstance(models.Model):
             Model representing a specific copy of a book (i.e. that can be borrowed from the library).
             """
 
+    class Meta:
+        permissions = (("can_mark_returned", "Set book as returned"),)
+
     @property
     def is_overdue(self):
         if self.due_back and date.today() > self.due_back:
@@ -79,15 +83,14 @@ class BookInstance(models.Model):
                               help_text='Book availability')
     borrower = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
-
     class Meta:
-     ordering = ["due_back"]
+        ordering = ["due_back"]
 
-     def __str__(self):
-        """
+        def __str__(self):
+            """
                 String for representing the Model object
                 """
-        return '%s (%s)' % (self.id, self.book.title)
+            return '%s (%s)' % (self.id, self.book.title)
 
 
 class Author(models.Model):
@@ -96,14 +99,13 @@ class Author(models.Model):
     date_of_birth = models.DateField(null=True, blank=True)
     date_of_death = models.DateField('Died', null=True, blank=True)
 
+    class Meta:
+        ordering = ['last_name', 'first_name']
+
     def get_absolute_url(self):
-        """
-                Returns the url to access a particular author instance.
-                """
+        """Returns the url to access a particular author instance."""
         return reverse('author-detail', args=[str(self.id)])
 
     def __str__(self):
-        """
-                String for representing the Model object.
-                """
-        return '%s, %s' % (self.last_name, self.first_name)
+        """String for representing the Model object."""
+        return '{0}, {1}'.format(self.last_name, self.first_name)
